@@ -1,0 +1,257 @@
+<title>Colouring artanh(z⁸)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;1,400&display=swap">
+<style>
+/* Layout: a header strip, a shared control row, then four equal square panels in a row
+   (2x2 on tablets, 1 column on phones). The panels are the page. */
+:root {
+  --bg: #f3f4f7;
+  --surface: #ffffff;
+  --fg: #171a22;
+  --muted: #5d6475;
+  --line: #d9dce5;
+  --accent: #3b4fd8;
+  --ghost: #eceef4;
+  --font-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1117; --surface: #171a23; --fg: #e7e9f0; --muted: #959cb0;
+    --line: #2a2f3d; --accent: #8c9bff; --ghost: #1d212c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1117; --surface: #171a23; --fg: #e7e9f0; --muted: #959cb0;
+  --line: #2a2f3d; --accent: #8c9bff; --ghost: #1d212c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1600px; margin: 0 auto; display: grid; gap: 22px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 em { font-style: italic; font-weight: 400; }
+.lede { color: var(--muted); margin: 0; max-width: 72ch; }
+.lede code, .formula { font-family: var(--font-mono); font-size: 0.9em; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: end; padding-block: 12px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
+select { font: inherit; font-size: 14px; padding: 6px 28px 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--fg); }
+select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.readout { margin-left: auto; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; min-height: 1.5em; }
+.readout b { color: var(--fg); font-weight: 500; }
+
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+.panel { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.panel-head { display: flex; align-items: baseline; gap: 10px; }
+.tag { font-family: var(--font-mono); font-size: 12px; color: var(--accent); font-weight: 500; }
+.panel h2 { font-size: 15px; font-weight: 600; margin: 0; }
+.stage { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 4px; overflow: hidden; background: var(--ghost); border: 1px solid var(--line); }
+.stage canvas { width: 100%; height: 100%; display: block; image-rendering: auto; cursor: crosshair; }
+.placeholder { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 6px; color: var(--muted); padding: 20px;
+  background: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--line) 45%, transparent) 10px 11px); }
+.placeholder strong { color: var(--fg); font-weight: 500; }
+.bar { display: grid; gap: 3px; }
+.bar canvas { width: 100%; height: 10px; border-radius: 2px; display: block; }
+.bar .ticks { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.desc { margin: 0; font-size: 13.5px; color: var(--muted); }
+.desc .formula { color: var(--fg); }
+.note { font-size: 13px; color: var(--muted); margin: 0; max-width: 80ch; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Four ways to colour <em>artanh</em>(z<sup>8</sup>)</h1>
+    <p class="lede">Each panel shows the same function on the same grid with the same palette. Only the rule that maps a value to a position on the palette changes, so differences between panels come from the technique alone.</p>
+  </header>
+
+  <div class="controls">
+    <div class="field">
+      <label for="qty">Quantity</label>
+      <select id="qty">
+        <option value="abs" selected>Modulus |f(z)|</option>
+        <option value="re">Real part Re f(z)</option>
+        <option value="im">Imaginary part Im f(z)</option>
+        <option value="arg">Argument arg f(z)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="pal">Palette (shared)</label>
+      <select id="pal">
+        <option value="viridis" selected>Viridis</option>
+        <option value="inferno">Inferno</option>
+        <option value="gray">Greyscale</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="dom">Window</label>
+      <select id="dom">
+        <option value="1.5" selected>|Re z|, |Im z| ≤ 1.5</option>
+        <option value="1.15">|Re z|, |Im z| ≤ 1.15</option>
+        <option value="3">|Re z|, |Im z| ≤ 3</option>
+      </select>
+    </div>
+    <div class="readout" id="readout">Hover a panel to read z and f(z).</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="note">f(z) = artanh(z<sup>8</sup>) = ½·[log(1 + z<sup>8</sup>) − log(1 − z<sup>8</sup>)], principal branch. It has 16 logarithmic singularities on the unit circle where z<sup>8</sup> = ±1, and branch cuts running outward from them along the rays where z<sup>8</sup> is real with |z<sup>8</sup>| &gt; 1. Grid: 560 × 560 samples.</p>
+</div>
+
+<script>
+(() => {
+  const N = 560;
+
+  // ---- palettes: polynomial fits of matplotlib's viridis / inferno ----
+  const PAL = {
+    viridis: [
+      [0.2777273272234177, 0.005407344544966578, 0.3340998053353061],
+      [0.1050930431085774, 1.404613529898575, 1.384590162594685],
+      [-0.3308618287255563, 0.214847559468213, 0.09509516302823659],
+      [-4.634230498983486, -5.799100973351585, -19.33244095627987],
+      [6.228269936347081, 14.17993336680509, 56.69055260068105],
+      [4.776384997670288, -13.74514537774601, -65.35303263337234],
+      [-5.435455855934631, 4.645852612178535, 26.3124352495832]],
+    inferno: [
+      [0.0002189403691192265, 0.001651004631001012, -0.01948089843709184],
+      [0.1065134194856116, 0.5639564367884091, 3.932712388889277],
+      [11.60249308247187, -3.972853965665698, -15.9423941062914],
+      [-41.70399613139459, 17.43639888205313, 44.35414519872813],
+      [77.162935699427, -33.40235894210092, -81.80730925738993],
+      [-71.31942824499214, 32.62606426397723, 73.20951985803202],
+      [25.13112622477341, -12.24266895238567, -23.07032500287172]],
+  };
+  function buildLUT(name) {
+    const lut = new Uint8ClampedArray(256 * 3);
+    for (let i = 0; i < 256; i++) {
+      const t = i / 255;
+      let rgb;
+      if (name === "gray") rgb = [t, t, t];
+      else {
+        const c = PAL[name];
+        rgb = [0, 1, 2].map(k => c[0][k] + t*(c[1][k] + t*(c[2][k] + t*(c[3][k] + t*(c[4][k] + t*(c[5][k] + t*c[6][k]))))));
+      }
+      lut[i*3] = rgb[0] * 255; lut[i*3+1] = rgb[1] * 255; lut[i*3+2] = rgb[2] * 255;
+    }
+    return lut;
+  }
+
+  // ---- f(z) = artanh(z^8) ----
+  function f(x, y) {
+    const r = Math.hypot(x, y), th = Math.atan2(y, x);
+    const r8 = r ** 8, a = 8 * th;
+    const wr = r8 * Math.cos(a), wi = r8 * Math.sin(a);
+    // 0.5 * (log(1+w) - log(1-w))
+    const pr = 1 + wr, pi = wi, mr = 1 - wr, mi = -wi;
+    const re = 0.25 * (Math.log(pr*pr + pi*pi) - Math.log(mr*mr + mi*mi));
+    const im = 0.5 * (Math.atan2(pi, pr) - Math.atan2(mi, mr));
+    return [re, im];
+  }
+
+  // ---- techniques: each maps a Float64Array of values to t in [0,1] (NaN = no colour) ----
+  const TECHNIQUES = [
+    {
+      tag: "A", name: "Min–max scaling",
+      desc: 'Linear stretch of the sampled range onto the palette: <span class="formula">t = (v − min) / (max − min)</span>.',
+      map(v) {
+        let lo = Infinity, hi = -Infinity;
+        for (const x of v) if (Number.isFinite(x)) { if (x < lo) lo = x; if (x > hi) hi = x; }
+        const span = hi - lo || 1, t = new Float32Array(v.length);
+        for (let i = 0; i < v.length; i++) t[i] = Number.isFinite(v[i]) ? (v[i] - lo) / span : NaN;
+        return { t, lo, hi };
+      },
+    },
+    { tag: "B", name: "Technique 2", pending: true },
+    { tag: "C", name: "Technique 3", pending: true },
+    { tag: "D", name: "Technique 4", pending: true },
+  ];
+
+  const grid = document.getElementById("grid");
+  const panels = TECHNIQUES.map(tq => {
+    const el = document.createElement("section");
+    el.className = "panel";
+    el.innerHTML = `
+      <div class="panel-head"><span class="tag">${tq.tag}</span><h2>${tq.name}</h2></div>
+      <div class="stage"><canvas width="${N}" height="${N}"></canvas>${tq.pending ? '<div class="placeholder"><strong>Not yet defined</strong><span>Waiting for the description of this technique.</span></div>' : ""}</div>
+      <div class="bar"><canvas width="256" height="1"></canvas><div class="ticks"><span></span><span></span></div></div>
+      <p class="desc">${tq.desc || "Same function, grid and palette as panel A."}</p>`;
+    grid.appendChild(el);
+    return { tq, el, canvas: el.querySelector(".stage canvas"), bar: el.querySelector(".bar canvas"), ticks: el.querySelectorAll(".ticks span"), result: null };
+  });
+
+  const qtySel = document.getElementById("qty"), palSel = document.getElementById("pal"), domSel = document.getElementById("dom");
+  const readout = document.getElementById("readout");
+  let re, im, values, R;
+
+  function sample() {
+    R = parseFloat(domSel.value);
+    re = new Float64Array(N * N); im = new Float64Array(N * N);
+    for (let j = 0; j < N; j++) {
+      const y = R - (2 * R * (j + 0.5)) / N;
+      for (let i = 0; i < N; i++) {
+        const x = -R + (2 * R * (i + 0.5)) / N;
+        const [a, b] = f(x, y);
+        re[j*N + i] = a; im[j*N + i] = b;
+      }
+    }
+  }
+  function pickQuantity() {
+    const q = qtySel.value;
+    values = new Float64Array(N * N);
+    for (let k = 0; k < values.length; k++)
+      values[k] = q === "abs" ? Math.hypot(re[k], im[k]) : q === "re" ? re[k] : q === "im" ? im[k] : Math.atan2(im[k], re[k]);
+  }
+  const fmt = x => !Number.isFinite(x) ? "—" : Math.abs(x) >= 1e4 || (Math.abs(x) < 1e-3 && x !== 0) ? x.toExponential(2) : x.toFixed(3);
+
+  function paint() {
+    const lut = buildLUT(palSel.value);
+    for (const p of panels) {
+      const bctx = p.bar.getContext("2d"), bimg = bctx.createImageData(256, 1);
+      for (let i = 0; i < 256; i++) { bimg.data.set([lut[i*3], lut[i*3+1], lut[i*3+2], 255], i*4); }
+      bctx.putImageData(bimg, 0, 0);
+      if (p.tq.pending) { p.ticks[0].textContent = ""; p.ticks[1].textContent = ""; continue; }
+      p.result = p.tq.map(values);
+      const ctx = p.canvas.getContext("2d"), img = ctx.createImageData(N, N), d = img.data, t = p.result.t;
+      for (let k = 0; k < t.length; k++) {
+        const o = k * 4;
+        if (Number.isNaN(t[k])) { d[o] = d[o+1] = d[o+2] = 128; d[o+3] = 255; continue; }
+        const li = Math.max(0, Math.min(255, Math.round(t[k] * 255))) * 3;
+        d[o] = lut[li]; d[o+1] = lut[li+1]; d[o+2] = lut[li+2]; d[o+3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      p.ticks[0].textContent = fmt(p.result.lo);
+      p.ticks[1].textContent = fmt(p.result.hi);
+    }
+  }
+
+  for (const p of panels) {
+    p.canvas.addEventListener("pointermove", e => {
+      const rect = p.canvas.getBoundingClientRect();
+      const i = Math.min(N - 1, Math.max(0, Math.floor((e.clientX - rect.left) / rect.width * N)));
+      const j = Math.min(N - 1, Math.max(0, Math.floor((e.clientY - rect.top) / rect.height * N)));
+      const k = j * N + i, x = -R + 2 * R * (i + 0.5) / N, y = R - 2 * R * (j + 0.5) / N;
+      const tv = p.result ? p.result.t[k] : NaN;
+      readout.innerHTML = `z = <b>${x.toFixed(3)} ${y < 0 ? "−" : "+"} ${Math.abs(y).toFixed(3)}i</b> · f = <b>${fmt(re[k])} ${im[k] < 0 ? "−" : "+"} ${fmt(Math.abs(im[k]))}i</b> · value <b>${fmt(values[k])}</b>` + (p.result ? ` · t<sub>${p.tq.tag}</sub> = <b>${tv.toFixed(3)}</b>` : "");
+    });
+  }
+
+  function all() { sample(); pickQuantity(); paint(); }
+  qtySel.addEventListener("change", () => { pickQuantity(); paint(); });
+  palSel.addEventListener("change", paint);
+  domSel.addEventListener("change", all);
+  all();
+})();
+</script>
