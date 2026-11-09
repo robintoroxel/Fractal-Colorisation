@@ -185,7 +185,24 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         return { t: r.t, lo: inv(r.lo), hi: inv(r.hi) };
       },
     },
-    { tag: "C", name: "Technique 3", pending: true },
+    {
+      tag: "C", name: "Histogram equalization",
+      desc: 'Each sample is coloured by its rank, the empirical CDF <span class="formula">t = F(v) = #{w ≤ v} / n</span>, so every colour of the palette covers the same number of pixels. Equal values share their mean rank.',
+      map(v) {
+        const n = v.length, idx = new Uint32Array(n), t = new Float32Array(n);
+        let m = 0;
+        for (let i = 0; i < n; i++) if (Number.isFinite(v[i])) idx[m++] = i; else t[i] = NaN;
+        const ord = idx.subarray(0, m).sort((a, b) => v[a] - v[b]);
+        for (let s = 0; s < m; ) {
+          let e = s;
+          while (e + 1 < m && v[ord[e + 1]] === v[ord[s]]) e++;
+          const r = m > 1 ? (s + e) / 2 / (m - 1) : 0.5;
+          for (let k = s; k <= e; k++) t[ord[k]] = r;
+          s = e + 1;
+        }
+        return { t, lo: v[ord[0]], hi: v[ord[m - 1]] };
+      },
+    },
     { tag: "D", name: "Technique 4", pending: true },
   ];
 
