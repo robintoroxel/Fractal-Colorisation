@@ -1,330 +1,139 @@
 <title>Colouring artanh(z⁸)</title>
-
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: a header strip, a shared control row, then four equal square panels in a row
-   (2x2 on tablets, 1 column on phones). The panels are the page. */
+/* Layout: five equal square panels in a row (3, 2, then 1 column on smaller screens). */
 :root {
-  --bg: #f3f4f7;
-  --surface: #ffffff;
-  --fg: #171a22;
-  --muted: #5d6475;
-  --line: #d9dce5;
-  --accent: #3b4fd8;
-  --ghost: #eceef4;
-  --font-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --bg: #f3f4f7; --fg: #171a22; --muted: #5d6475; --line: #d9dce5;
+  --std: #5d6475; --std-bg: #e4e6ed; --own: #2f43c9; --own-bg: #dfe3fb;
   --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1117; --surface: #171a23; --fg: #e7e9f0; --muted: #959cb0;
-    --line: #2a2f3d; --accent: #8c9bff; --ghost: #1d212c; color-scheme: dark;
+    --bg: #0f1117; --fg: #e7e9f0; --muted: #959cb0; --line: #2a2f3d;
+    --std: #b3b9c9; --std-bg: #232733; --own: #aab5ff; --own-bg: #232a52; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1117; --surface: #171a23; --fg: #e7e9f0; --muted: #959cb0;
-  --line: #2a2f3d; --accent: #8c9bff; --ghost: #1d212c; color-scheme: dark;
+  --bg: #0f1117; --fg: #e7e9f0; --muted: #959cb0; --line: #2a2f3d;
+  --std: #b3b9c9; --std-bg: #232733; --own: #aab5ff; --own-bg: #232a52; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
-  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 28px 48px;
+  padding-block: 28px 40px;
 }
-.wrap { max-width: 1840px; margin: 0 auto; display: grid; gap: 22px; }
-header { display: grid; gap: 6px; }
-h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.15; margin: 0; text-wrap: balance; }
-h1 em { font-style: italic; font-weight: 400; }
-.lede { color: var(--muted); margin: 0; max-width: 72ch; }
-.lede code, .formula { font-family: var(--font-mono); font-size: 0.9em; }
-
-.controls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: end; padding-block: 12px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.field { display: grid; gap: 4px; }
-.field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
-select { font: inherit; font-size: 14px; padding: 6px 28px 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--fg); }
-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.readout { margin-left: auto; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; min-height: 1.5em; }
-.readout b { color: var(--fg); font-weight: 500; }
-
-.grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; }
+.grid { max-width: 1840px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; }
 @media (max-width: 1280px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 820px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-
-.panel { display: grid; gap: 10px; align-content: start; min-width: 0; }
-.panel-head { display: flex; align-items: baseline; gap: 10px; }
-.tag { font-family: var(--font-mono); font-size: 12px; color: var(--accent); font-weight: 500; }
+.panel { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.panel canvas { width: 100%; max-width: 100%; aspect-ratio: 1; display: block; border-radius: 4px; border: 1px solid var(--line); }
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .panel h2 { font-size: 15px; font-weight: 600; margin: 0; }
-.stage { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 4px; overflow: hidden; background: var(--ghost); border: 1px solid var(--line); }
-.stage canvas { width: 100%; height: 100%; display: block; image-rendering: auto; cursor: crosshair; }
-.placeholder { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 6px; color: var(--muted); padding: 20px;
-  background: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--line) 45%, transparent) 10px 11px); }
-.placeholder strong { color: var(--fg); font-weight: 500; }
-.bar { display: grid; gap: 3px; }
-.bar canvas { width: 100%; height: 10px; border-radius: 2px; display: block; }
-.bar .ticks { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.desc { margin: 0; font-size: 13.5px; color: var(--muted); }
-.desc .formula { color: var(--fg); }
-.note { font-size: 13px; color: var(--muted); margin: 0; max-width: 80ch; }
+.badge { font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; padding: 2px 7px; border-radius: 999px; }
+.badge.std { color: var(--std); background: var(--std-bg); }
+.badge.own { color: var(--own); background: var(--own-bg); }
+.panel p { margin: 0; font-size: 13.5px; color: var(--muted); }
 </style>
 
-<div class="wrap">
-  <header>
-    <h1>Five ways to colour <em>artanh</em>(z<sup>8</sup>)</h1>
-    <p class="lede">Each panel shows the same function on the same grid with the same palette. Only the rule that maps a value to a position on the palette changes, so differences between panels come from the technique alone.</p>
-  </header>
-
-  <div class="controls">
-    <div class="field">
-      <label for="qty">Quantity</label>
-      <select id="qty">
-        <option value="abs" selected>Modulus |f(z)|</option>
-        <option value="re">Real part Re f(z)</option>
-        <option value="im">Imaginary part Im f(z)</option>
-        <option value="arg">Argument arg f(z)</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="pal">Palette (shared)</label>
-      <select id="pal">
-        <option value="viridis" selected>Viridis</option>
-        <option value="inferno">Inferno</option>
-        <option value="gray">Greyscale</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="dom">Window</label>
-      <select id="dom">
-        <option value="1.5" selected>|Re z|, |Im z| ≤ 1.5</option>
-        <option value="1.15">|Re z|, |Im z| ≤ 1.15</option>
-        <option value="3">|Re z|, |Im z| ≤ 3</option>
-      </select>
-    </div>
-    <div class="readout" id="readout">Hover a panel to read z and f(z).</div>
-  </div>
-
-  <div class="grid" id="grid"></div>
-
-  <p class="note">f(z) = artanh(z<sup>8</sup>) = ½·[log(1 + z<sup>8</sup>) − log(1 − z<sup>8</sup>)], principal branch. It has 16 logarithmic singularities on the unit circle where z<sup>8</sup> = ±1, and branch cuts running outward from them along the rays where z<sup>8</sup> is real with |z<sup>8</sup>| &gt; 1. Grid: 560 × 560 samples.</p>
-</div>
+<div class="grid" id="grid"></div>
 
 <script>
 (() => {
-  const N = 560;
+  const N = 560, R = 1.5;
 
-  // ---- palettes: polynomial fits of matplotlib's viridis / inferno ----
-  const PAL = {
-    viridis: [
-      [0.2777273272234177, 0.005407344544966578, 0.3340998053353061],
-      [0.1050930431085774, 1.404613529898575, 1.384590162594685],
-      [-0.3308618287255563, 0.214847559468213, 0.09509516302823659],
-      [-4.634230498983486, -5.799100973351585, -19.33244095627987],
-      [6.228269936347081, 14.17993336680509, 56.69055260068105],
-      [4.776384997670288, -13.74514537774601, -65.35303263337234],
-      [-5.435455855934631, 4.645852612178535, 26.3124352495832]],
-    inferno: [
-      [0.0002189403691192265, 0.001651004631001012, -0.01948089843709184],
-      [0.1065134194856116, 0.5639564367884091, 3.932712388889277],
-      [11.60249308247187, -3.972853965665698, -15.9423941062914],
-      [-41.70399613139459, 17.43639888205313, 44.35414519872813],
-      [77.162935699427, -33.40235894210092, -81.80730925738993],
-      [-71.31942824499214, 32.62606426397723, 73.20951985803202],
-      [25.13112622477341, -12.24266895238567, -23.07032500287172]],
-  };
-  function buildLUT(name) {
-    const lut = new Uint8ClampedArray(256 * 3);
-    for (let i = 0; i < 256; i++) {
-      const t = i / 255;
-      let rgb;
-      if (name === "gray") rgb = [t, t, t];
-      else {
-        const c = PAL[name];
-        rgb = [0, 1, 2].map(k => c[0][k] + t*(c[1][k] + t*(c[2][k] + t*(c[3][k] + t*(c[4][k] + t*(c[5][k] + t*c[6][k]))))));
-      }
-      lut[i*3] = rgb[0] * 255; lut[i*3+1] = rgb[1] * 255; lut[i*3+2] = rgb[2] * 255;
+  // Viridis (polynomial fit of matplotlib's colormap), shared by every panel
+  const C = [
+    [0.2777273272234177, 0.005407344544966578, 0.3340998053353061],
+    [0.1050930431085774, 1.404613529898575, 1.384590162594685],
+    [-0.3308618287255563, 0.214847559468213, 0.09509516302823659],
+    [-4.634230498983486, -5.799100973351585, -19.33244095627987],
+    [6.228269936347081, 14.17993336680509, 56.69055260068105],
+    [4.776384997670288, -13.74514537774601, -65.35303263337234],
+    [-5.435455855934631, 4.645852612178535, 26.3124352495832]];
+  const lut = new Uint8ClampedArray(256 * 3);
+  for (let i = 0; i < 256; i++) {
+    const t = i / 255;
+    for (let k = 0; k < 3; k++)
+      lut[i*3+k] = 255 * (C[0][k] + t*(C[1][k] + t*(C[2][k] + t*(C[3][k] + t*(C[4][k] + t*(C[5][k] + t*C[6][k]))))));
+  }
+
+  // f(z) = artanh(z^8) = ½[log(1 + z^8) − log(1 − z^8)] on [−1.5, 1.5]²
+  const re = new Float64Array(N * N), im = new Float64Array(N * N), ab = new Float64Array(N * N);
+  for (let j = 0; j < N; j++) {
+    const y = R - (2 * R * (j + 0.5)) / N;
+    for (let i = 0; i < N; i++) {
+      const x = -R + (2 * R * (i + 0.5)) / N, k = j * N + i;
+      const r8 = Math.hypot(x, y) ** 8, a = 8 * Math.atan2(y, x);
+      const wr = r8 * Math.cos(a), wi = r8 * Math.sin(a);
+      re[k] = 0.25 * (Math.log((1 + wr) ** 2 + wi * wi) - Math.log((1 - wr) ** 2 + wi * wi));
+      im[k] = 0.5 * (Math.atan2(wi, 1 + wr) - Math.atan2(-wi, 1 - wr));
+      ab[k] = Math.hypot(re[k], im[k]);
     }
-    return lut;
   }
 
-  // ---- f(z) = artanh(z^8) ----
-  function f(x, y) {
-    const r = Math.hypot(x, y), th = Math.atan2(y, x);
-    const r8 = r ** 8, a = 8 * th;
-    const wr = r8 * Math.cos(a), wi = r8 * Math.sin(a);
-    // 0.5 * (log(1+w) - log(1-w))
-    const pr = 1 + wr, pi = wi, mr = 1 - wr, mi = -wi;
-    const re = 0.25 * (Math.log(pr*pr + pi*pi) - Math.log(mr*mr + mi*mi));
-    const im = 0.5 * (Math.atan2(pi, pr) - Math.atan2(mi, mr));
-    return [re, im];
-  }
+  const minmax = v => {
+    let lo = Infinity, hi = -Infinity;
+    for (const x of v) if (Number.isFinite(x)) { if (x < lo) lo = x; if (x > hi) hi = x; }
+    const s = hi - lo || 1;
+    return Float32Array.from(v, x => (x - lo) / s);
+  };
+  const deciles = v => {
+    const s = Float64Array.from(v.filter(Number.isFinite)).sort(), m = s.length;
+    return Array.from({ length: 11 }, (_, k) => { const x = k / 10 * (m - 1), a = Math.floor(x), b = Math.min(m - 1, a + 1); return s[a] + (x - a) * (s[b] - s[a]); });
+  };
+  // position of x within the deciles q, in [0, 10], linear inside each segment
+  const decPos = (q, x) => {
+    let k = 0; while (k < 9 && x > q[k + 1]) k++;
+    const w = q[k + 1] - q[k];
+    return k + (w > 0 ? Math.min(1, Math.max(0, (x - q[k]) / w)) : 0.5);
+  };
 
-  // ---- techniques: each maps a Float64Array of values to t in [0,1] (NaN = no colour) ----
   const TECHNIQUES = [
-    {
-      tag: "A", name: "Min–max scaling",
-      desc: 'Linear stretch of the sampled range onto the palette: <span class="formula">t = (v − min) / (max − min)</span>.',
-      map(v) {
-        let lo = Infinity, hi = -Infinity;
-        for (const x of v) if (Number.isFinite(x)) { if (x < lo) lo = x; if (x > hi) hi = x; }
-        const span = hi - lo || 1, t = new Float32Array(v.length);
-        for (let i = 0; i < v.length; i++) t[i] = Number.isFinite(v[i]) ? (v[i] - lo) / span : NaN;
-        return { t, lo, hi };
-      },
-    },
-    {
-      tag: "B", name: "Log scaling",
-      desc: 'Compress with <span class="formula">u = log(1 + v)</span> (signed quantities use <span class="formula">sign(v)·log(1 + |v|)</span>), then min–max scale u. Bar ticks show v.',
-      map(v) {
-        const u = new Float64Array(v.length);
-        for (let i = 0; i < v.length; i++) u[i] = Math.sign(v[i]) * Math.log1p(Math.abs(v[i]));
-        const r = TECHNIQUES[0].map(u);
-        const inv = x => Math.sign(x) * Math.expm1(Math.abs(x));
-        return { t: r.t, lo: inv(r.lo), hi: inv(r.hi) };
-      },
-    },
-    {
-      tag: "C", name: "Histogram equalization",
-      desc: 'Each sample is coloured by its rank, the empirical CDF <span class="formula">t = F(v) = #{w ≤ v} / n</span>, so every colour of the palette covers the same number of pixels. Equal values share their mean rank.',
-      map(v) {
-        const n = v.length, idx = new Uint32Array(n), t = new Float32Array(n);
-        let m = 0;
-        for (let i = 0; i < n; i++) if (Number.isFinite(v[i])) idx[m++] = i; else t[i] = NaN;
-        const ord = idx.subarray(0, m).sort((a, b) => v[a] - v[b]);
-        for (let s = 0; s < m; ) {
-          let e = s;
-          while (e + 1 < m && v[ord[e + 1]] === v[ord[s]]) e++;
-          const r = m > 1 ? (s + e) / 2 / (m - 1) : 0.5;
-          for (let k = s; k <= e; k++) t[ord[k]] = r;
-          s = e + 1;
-        }
-        return { t, lo: v[ord[0]], hi: v[ord[m - 1]] };
-      },
-    },
-    {
-      tag: "D", name: "Piecewise-linear deciles",
-      desc: 'Take the 11 decile breakpoints <span class="formula">q₀ … q₁₀</span> (0 %, 10 %, …, 100 %) of the sampled values. Between q<sub>k</sub> and q<sub>k+1</sub>, map linearly onto <span class="formula">[k/10, (k+1)/10]</span> of the palette.',
-      map(v) {
-        const s = Float64Array.from(v.filter(Number.isFinite)).sort(), m = s.length;
-        const at = p => { const x = p * (m - 1), a = Math.floor(x), b = Math.min(m - 1, a + 1); return s[a] + (x - a) * (s[b] - s[a]); };
-        const q = Array.from({ length: 11 }, (_, k) => at(k / 10));
-        const t = new Float32Array(v.length);
-        for (let i = 0; i < v.length; i++) {
-          const x = v[i];
-          if (!Number.isFinite(x)) { t[i] = NaN; continue; }
-          let k = 0;
-          while (k < 9 && x > q[k + 1]) k++;
-          const w = q[k + 1] - q[k];
-          t[i] = (k + (w > 0 ? Math.min(1, Math.max(0, (x - q[k]) / w)) : 0.5)) / 10;
-        }
-        return { t, lo: q[0], hi: q[10], marks: q };
-      },
-    },
-    {
-      tag: "E", name: "2-D decile mesh (Re × Im)",
-      desc: 'Deciles <span class="formula">a₀…a₁₀</span> of Re f and <span class="formula">b₀…b₁₀</span> of Im f form an 11 × 11 mesh grid. Unravelled in row-major order, node (i, j) gets <span class="formula">t = (11i + j) / 120</span>, so (a₀, b₀) is the palette start and (a₁₀, b₁₀) its end. The mesh is triangulated and t is interpolated linearly on each triangle, as scipy’s LinearNDInterpolator does. Uses Re and Im whatever the quantity selector says.',
-      map() {
-        const dec = arr => { const s = Float64Array.from(arr.filter(Number.isFinite)).sort(), m = s.length;
-          return Array.from({ length: 11 }, (_, k) => { const x = k / 10 * (m - 1), a = Math.floor(x), b = Math.min(m - 1, a + 1); return s[a] + (x - a) * (s[b] - s[a]); }); };
-        const A = dec(re), B = dec(im), node = (i, j) => (11 * i + j) / 120;
-        const seg = (q, x) => { let k = 0; while (k < 9 && x > q[k + 1]) k++; const w = q[k + 1] - q[k]; return [k, w > 0 ? Math.min(1, Math.max(0, (x - q[k]) / w)) : 0]; };
-        const t = new Float32Array(re.length);
-        for (let p = 0; p < re.length; p++) {
-          if (!Number.isFinite(re[p]) || !Number.isFinite(im[p])) { t[p] = NaN; continue; }
-          const [i, u] = seg(A, re[p]), [j, w] = seg(B, im[p]);
-          // each mesh cell is split along its (i, j)–(i+1, j+1) diagonal; barycentric weights on the triangle
-          const t00 = node(i, j), t11 = node(i + 1, j + 1);
-          t[p] = u >= w ? t00 + u * (node(i + 1, j) - t00) + w * (t11 - node(i + 1, j))
-                        : t00 + w * (node(i, j + 1) - t00) + u * (t11 - node(i, j + 1));
-        }
-        return { t, loText: `(${fmt(A[0])}, ${fmt(B[0])})`, hiText: `(${fmt(A[10])}, ${fmt(B[10])})`,
-          marksHTML: 'Re deciles: <span class="formula">' + A.map(fmt).join(", ") + '</span><br>Im deciles: <span class="formula">' + B.map(fmt).join(", ") + "</span>" };
-      },
-    },
+    { name: "Min–max scaling", own: false,
+      desc: "Linear stretch of |f| from its minimum to its maximum onto the palette.",
+      map: () => minmax(ab) },
+    { name: "Log scaling", own: false,
+      desc: "Min–max scaling of log(1 + |f|).",
+      map: () => minmax(ab.map(Math.log1p)) },
+    { name: "Histogram equalization", own: false,
+      desc: "Each pixel is coloured by the rank of |f| among all pixels.",
+      map: () => {
+        const n = ab.length, ord = Uint32Array.from({ length: n }, (_, i) => i).sort((a, b) => ab[a] - ab[b]), t = new Float32Array(n);
+        for (let s = 0; s < n; ) { let e = s; while (e + 1 < n && ab[ord[e + 1]] === ab[ord[s]]) e++;
+          for (let k = s; k <= e; k++) t[ord[k]] = (s + e) / 2 / (n - 1); s = e + 1; }
+        return t;
+      } },
+    { name: "Piecewise-linear deciles", own: true,
+      desc: "Linear interpolation of |f| between its 10 quantiles, each segment getting a tenth of the palette.",
+      map: () => { const q = deciles(ab); return Float32Array.from(ab, x => decPos(q, x) / 10); } },
+    { name: "2-D decile mesh", own: true,
+      desc: "Linear interpolation over a triangulated mesh of the Re and Im quantiles, ordered from (0, 0) to (1, 1) along the palette.",
+      map: () => { const A = deciles(re), B = deciles(im);
+        return Float32Array.from(re, (x, k) => (11 * decPos(A, x) + decPos(B, im[k])) / 120); } },
   ];
 
   const grid = document.getElementById("grid");
-  const panels = TECHNIQUES.map(tq => {
+  for (const tq of TECHNIQUES) {
     const el = document.createElement("section");
     el.className = "panel";
-    el.innerHTML = `
-      <div class="panel-head"><span class="tag">${tq.tag}</span><h2>${tq.name}</h2></div>
-      <div class="stage"><canvas width="${N}" height="${N}"></canvas>${tq.pending ? '<div class="placeholder"><strong>Not yet defined</strong><span>Waiting for the description of this technique.</span></div>' : ""}</div>
-      <div class="bar"><canvas width="256" height="1"></canvas><div class="ticks"><span></span><span></span></div></div>
-      <p class="desc">${tq.desc || "Same function, grid and palette as panel A."}</p>
-      <p class="desc marks" hidden></p>`;
+    el.innerHTML = `<canvas width="${N}" height="${N}"></canvas>
+      <div class="head"><h2>${tq.name}</h2><span class="badge ${tq.own ? "own" : "std"}">${tq.own ? "Own method" : "Standard"}</span></div>
+      <p>${tq.desc}</p>`;
     grid.appendChild(el);
-    return { tq, el, canvas: el.querySelector(".stage canvas"), bar: el.querySelector(".bar canvas"), ticks: el.querySelectorAll(".ticks span"), result: null };
-  });
-
-  const qtySel = document.getElementById("qty"), palSel = document.getElementById("pal"), domSel = document.getElementById("dom");
-  const readout = document.getElementById("readout");
-  let re, im, values, R;
-
-  function sample() {
-    R = parseFloat(domSel.value);
-    re = new Float64Array(N * N); im = new Float64Array(N * N);
-    for (let j = 0; j < N; j++) {
-      const y = R - (2 * R * (j + 0.5)) / N;
-      for (let i = 0; i < N; i++) {
-        const x = -R + (2 * R * (i + 0.5)) / N;
-        const [a, b] = f(x, y);
-        re[j*N + i] = a; im[j*N + i] = b;
-      }
+    const t = tq.map(), ctx = el.querySelector("canvas").getContext("2d"), img = ctx.createImageData(N, N), d = img.data;
+    for (let k = 0; k < t.length; k++) {
+      const o = k * 4;
+      if (!Number.isFinite(t[k])) { d[o] = d[o+1] = d[o+2] = 128; d[o+3] = 255; continue; }
+      const li = Math.max(0, Math.min(255, Math.round(t[k] * 255))) * 3;
+      d[o] = lut[li]; d[o+1] = lut[li+1]; d[o+2] = lut[li+2]; d[o+3] = 255;
     }
+    ctx.putImageData(img, 0, 0);
   }
-  function pickQuantity() {
-    const q = qtySel.value;
-    values = new Float64Array(N * N);
-    for (let k = 0; k < values.length; k++)
-      values[k] = q === "abs" ? Math.hypot(re[k], im[k]) : q === "re" ? re[k] : q === "im" ? im[k] : Math.atan2(im[k], re[k]);
-  }
-  const fmt = x => !Number.isFinite(x) ? "—" : Math.abs(x) >= 1e4 || (Math.abs(x) < 1e-3 && x !== 0) ? x.toExponential(2) : x.toFixed(3);
-
-  function paint() {
-    const lut = buildLUT(palSel.value);
-    for (const p of panels) {
-      const bctx = p.bar.getContext("2d"), bimg = bctx.createImageData(256, 1);
-      for (let i = 0; i < 256; i++) { bimg.data.set([lut[i*3], lut[i*3+1], lut[i*3+2], 255], i*4); }
-      bctx.putImageData(bimg, 0, 0);
-      if (p.tq.pending) { p.ticks[0].textContent = ""; p.ticks[1].textContent = ""; continue; }
-      p.result = p.tq.map(values);
-      const ctx = p.canvas.getContext("2d"), img = ctx.createImageData(N, N), d = img.data, t = p.result.t;
-      for (let k = 0; k < t.length; k++) {
-        const o = k * 4;
-        if (Number.isNaN(t[k])) { d[o] = d[o+1] = d[o+2] = 128; d[o+3] = 255; continue; }
-        const li = Math.max(0, Math.min(255, Math.round(t[k] * 255))) * 3;
-        d[o] = lut[li]; d[o+1] = lut[li+1]; d[o+2] = lut[li+2]; d[o+3] = 255;
-      }
-      ctx.putImageData(img, 0, 0);
-      p.ticks[0].textContent = p.result.loText ?? fmt(p.result.lo);
-      p.ticks[1].textContent = p.result.hiText ?? fmt(p.result.hi);
-      const mk = p.el.querySelector(".marks");
-      const html = p.result.marksHTML ?? (p.result.marks && 'Breakpoints: <span class="formula">' + p.result.marks.map(fmt).join(", ") + "</span>");
-      mk.hidden = !html;
-      if (html) mk.innerHTML = html;
-    }
-  }
-
-  for (const p of panels) {
-    p.canvas.addEventListener("pointermove", e => {
-      const rect = p.canvas.getBoundingClientRect();
-      const i = Math.min(N - 1, Math.max(0, Math.floor((e.clientX - rect.left) / rect.width * N)));
-      const j = Math.min(N - 1, Math.max(0, Math.floor((e.clientY - rect.top) / rect.height * N)));
-      const k = j * N + i, x = -R + 2 * R * (i + 0.5) / N, y = R - 2 * R * (j + 0.5) / N;
-      const tv = p.result ? p.result.t[k] : NaN;
-      readout.innerHTML = `z = <b>${x.toFixed(3)} ${y < 0 ? "−" : "+"} ${Math.abs(y).toFixed(3)}i</b> · f = <b>${fmt(re[k])} ${im[k] < 0 ? "−" : "+"} ${fmt(Math.abs(im[k]))}i</b> · value <b>${fmt(values[k])}</b>` + (p.result ? ` · t<sub>${p.tq.tag}</sub> = <b>${tv.toFixed(3)}</b>` : "");
-    });
-  }
-
-  function all() { sample(); pickQuantity(); paint(); }
-  qtySel.addEventListener("change", () => { pickQuantity(); paint(); });
-  palSel.addEventListener("change", paint);
-  domSel.addEventListener("change", all);
-  all();
 })();
 </script>
