@@ -174,7 +174,17 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         return { t, lo, hi };
       },
     },
-    { tag: "B", name: "Technique 2", pending: true },
+    {
+      tag: "B", name: "Log scaling",
+      desc: 'Compress with <span class="formula">u = log(1 + v)</span> (signed quantities use <span class="formula">sign(v)·log(1 + |v|)</span>), then min–max scale u. Bar ticks show v.',
+      map(v) {
+        const u = new Float64Array(v.length);
+        for (let i = 0; i < v.length; i++) u[i] = Math.sign(v[i]) * Math.log1p(Math.abs(v[i]));
+        const r = TECHNIQUES[0].map(u);
+        const inv = x => Math.sign(x) * Math.expm1(Math.abs(x));
+        return { t: r.t, lo: inv(r.lo), hi: inv(r.hi) };
+      },
+    },
     { tag: "C", name: "Technique 3", pending: true },
     { tag: "D", name: "Technique 4", pending: true },
   ];
